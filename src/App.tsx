@@ -1,10 +1,18 @@
-import React from "react";
-import logo from "./logo.svg";
-import Login from "./pages/login/Login";
+import React, { useState } from "react";
 import Dashboard from "./pages/dashboard/Dashboard";
+import Login from "./pages/login/Login";
+import ForgotPass from "./pages/login/ForgotPass";
 
 function App() {
-  return <Dashboard />;
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  return (
+    // <div>
+    //   {isLoggedIn ? <Dashboard /> : <Login setIsLoggedIn={setIsLoggedIn} />}
+    // </div>
+    // <Dashboard />
+    <ForgotPass />
+  );
 }
 
 export default App;

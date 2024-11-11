@@ -3,14 +3,8 @@ import { Calendar, theme } from "antd";
 import type { CalendarProps } from "antd";
 import type { Dayjs } from "dayjs";
 
-interface MyClenderProps {
-  value: Dayjs;
-  mode: CalendarProps<Dayjs>["mode"];
-}
-
-const MyClender: React.FC<MyClenderProps> = ({ value, mode }) => {
+const onPanelChange = (value: Dayjs, mode: CalendarProps<Dayjs>["mode"]) => {
   console.log(value.format("YYYY-MM-DD"), mode);
-  return null; // Or return any other JSX if needed
 };
 
 const App: React.FC = () => {
@@ -24,9 +18,9 @@ const App: React.FC = () => {
 
   return (
     <div style={wrapperStyle}>
-      <Calendar fullscreen={false} />
+      <Calendar fullscreen={false} onPanelChange={onPanelChange} />
     </div>
   );
 };
 
-export default App; // App is the default export
+export default App;

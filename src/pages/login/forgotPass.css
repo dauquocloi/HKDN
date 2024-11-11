@@ -1,0 +1,50 @@
+.Container {
+    display: flex;
+    flex-direction: row;
+    background-color: #f6f6f6;
+    height: 100vh;
+}
+
+.left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 41%;
+}
+
+.right {
+    width: 59%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    position: relative;
+    flex-direction: column;
+}
+
+.logo {
+    width: 150px;
+    margin-bottom: 20px;
+}
+
+
+
+.illustration {
+    width: 76%;
+    height: 71%;
+    position: relative;
+    left: 0%;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 70%;
+}
+
+.input-field {
+    width: 100%;
+    padding: 10px;
+}
