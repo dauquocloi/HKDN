@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./style.css";
 import Calendar from "../../components/calendar";
+import { error } from "console";
 
 const Dashboard = () => {
   // Thiết bị
@@ -32,17 +33,74 @@ const Dashboard = () => {
   );
 
   useEffect(() => {
-    setDeviceDegree((activeDevices / totalDevices) * 360);
+    setDeviceDegree((data1?.active / data1?.total) * 360);
     setServiceDegree((activeServices / totalServices) * 360);
     setNumberDegree((activeNumbers / totalNumbers) * 360);
-  }, [
-    activeDevices,
-    totalDevices,
-    activeServices,
-    totalServices,
-    activeNumbers,
-    totalNumbers,
-  ]);
+    setNumberDegree2((waitingNumbers / totalNumbers) * 360);
+  }, []);
+
+  const data = [
+    { date: "07", value: 3589 },
+    { date: "13", value: 3000 },
+    { date: "19", value: 4221 },
+    { date: "25", value: 3200 },
+    { date: "31", value: 2800 },
+  ];
+
+  interface DeviceInfo {
+    total: number;
+    active: number;
+    inactive: number;
+  }
+  interface ServiceInfo {
+    total: number;
+    active: number;
+    inactive: number;
+  }
+
+  interface DeviceData {
+    date: string;
+    value: number;
+  }
+
+  const [data1, setData1] = useState<DeviceInfo>({
+    total: 0,
+    active: 0,
+    inactive: 0,
+  });
+
+  // const [data2, setData2] = useState<ServiceInfo>({
+  //   total: number;
+  // });
+  // const [data, setData] = useState<DeviceData[]>([]);
+
+  // const [data1, setData1] = useState<any[]>([]);
+  const [data2, setData2] = useState<any>([]);
+
+  const getDeviceInfo = () => {
+    fetch("https://192.168.80.188:7251/api/Device/devicesinfor")
+      .then((Response) => Response.json())
+      .then((data: any) => {
+        console.log(data);
+        setData1(data);
+      })
+      .catch((error) => console.log("Error fetching data:", error));
+  };
+
+  const getServiceInfo = () => {
+    fetch("https://192.168.80.188:7251/api/Service/serviceinfor")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setData2(data);
+      })
+      .catch((error) => console.log("Error fetching data:", error));
+  };
+
+  useEffect(() => {
+    getDeviceInfo();
+    getServiceInfo();
+  }, []);
 
   return (
     <div className="Container">
@@ -71,7 +129,15 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="end-left">
-          <p className="Logout">Đăng xuất</p>
+          <p
+            className="Logout"
+            onClick={() => {
+              localStorage.clear();
+              window.location.reload();
+            }}
+          >
+            Đăng xuất
+          </p>
         </div>
       </div>
       <div className="middle"></div>
@@ -96,16 +162,16 @@ const Dashboard = () => {
                   }}
                 >
                   <div className="inner-circle">
-                    {Math.round((activeDevices * 100) / totalDevices)}%
+                    {Math.round((data1?.active * 100) / data1?.total)}%
                   </div>
                 </div>
               </div>
             </div>
             <div className="statistics">
-              <h1 className="quanlity">{totalDevices}</h1>
+              <h1 className="quanlity">{data1?.total}</h1>
               <ul>
-                <li>Đang hoạt động: {activeDevices}</li>
-                <li>Ngừng hoạt động: {inactiveDevices}</li>
+                <li>Đang hoạt động: {data1?.active}</li>
+                <li>Ngừng hoạt động: {data1?.total - data1?.active}</li>
               </ul>
             </div>
           </div>

@@ -1,23 +1,47 @@
 import React, { useState } from "react";
-import { Button, Form, Input } from "antd";
-import "./login.css";
+import { Button, Form, Input, message } from "antd";
+import style from "./login.module.css";
 import logo from "../../images/Logo.png";
+import { error } from "console";
 
-interface LoginProps {
-  setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
-}
+type LayoutType = Parameters<typeof Form>[0]["layout"];
+type LoginProps = {
+  handleSuccess: (isLogined: boolean) => void;
+};
 
-const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
+const Login = (props: LoginProps) => {
   const [form] = Form.useForm();
-  const [errorMessage, setErrorMessage] = useState("");
+  // const [errorMessage, setErrorMessage] = useState("");
 
-  const handleLogin = (values: any) => {
-    // Kiểm tra tên đăng nhập và mật khẩu
-    if (values.username === "admin" && values.password === "admin") {
-      setIsLoggedIn(true); // Cập nhật trạng thái đăng nhập thành công
-    } else {
-      setErrorMessage("Tên đăng nhập hoặc mật khẩu không đúng!");
-    }
+  const LoginRepuest = () => {};
+
+  const handleLogin = (value: any) => {
+    console.log(value.username);
+    console.log(value.password);
+    fetch("https://192.168.80.188:7251/api/Authenticate", {
+      method: "POST",
+      headers: {
+        ContentType: "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        email: value.username,
+        password: value.password,
+        role: "1",
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data == "Invalid credentials") {
+          message.info("Incorrect username or password");
+        } else {
+          localStorage.setItem("token", data.token);
+          props.handleSuccess(true);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   return (
@@ -47,7 +71,7 @@ const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
             >
               <Input.Password placeholder="Mật khẩu" className="input-field" />
             </Form.Item>
-            {errorMessage && <p className="error-message">{errorMessage}</p>}
+
             <Form.Item>
               <a className="forgot-password">Quên mật khẩu?</a>
             </Form.Item>
