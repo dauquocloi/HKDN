@@ -1,13 +1,13 @@
-import React from "react";
-import { Calendar, theme } from "antd";
-import type { CalendarProps } from "antd";
-import type { Dayjs } from "dayjs";
+import React from 'react';
+import { Calendar, theme } from 'antd';
+import type { CalendarProps } from 'antd';
+import type { Dayjs } from 'dayjs';
 
-const onPanelChange = (value: Dayjs, mode: CalendarProps<Dayjs>["mode"]) => {
-  console.log(value.format("YYYY-MM-DD"), mode);
+const onPanelChange = (value: Dayjs, mode: CalendarProps<Dayjs>['mode']) => {
+  console.log(value.format('YYYY-MM-DD'), mode);
 };
 
-const App: React.FC = () => {
+const MyCalendar: React.FC = () => {
   const { token } = theme.useToken();
 
   const wrapperStyle: React.CSSProperties = {
@@ -23,4 +23,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default MyCalendar;

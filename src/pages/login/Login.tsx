@@ -1,101 +1,77 @@
-import React, { useState } from "react";
-import { Button, Form, Input, message } from "antd";
-import style from "./login.module.css";
-import logo from "../../images/Logo.png";
-import { error } from "console";
-
+import React, { useState, useEffect, useContext } from "react";
+import { Button, Form, Input, message, Radio } from "antd";
+import styles from "./Login.module.css";
+import { GetLogin } from "./Login.logic";
+import { SignalRContext } from "../../helpers/SignalRProvider";
+import { HubConnectionState } from "@microsoft/signalr";
 type LayoutType = Parameters<typeof Form>[0]["layout"];
 type LoginProps = {
   handleSuccess: (isLogined: boolean) => void;
 };
-
 const Login = (props: LoginProps) => {
+  const connection = useContext(SignalRContext);
   const [form] = Form.useForm();
-  // const [errorMessage, setErrorMessage] = useState("");
+  const [formLayout, setFormLayout] = useState<LayoutType>("vertical");
 
-  const LoginRepuest = () => {};
-
-  const handleLogin = (value: any) => {
-    console.log(value.username);
-    console.log(value.password);
-    fetch("https://192.168.80.188:7251/api/Authenticate", {
-      method: "POST",
-      headers: {
-        ContentType: "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        email: value.username,
-        password: value.password,
-        role: "1",
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data == "Invalid credentials") {
-          message.info("Incorrect username or password");
-        } else {
-          localStorage.setItem("token", data.token);
-          props.handleSuccess(true);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  const onFormLayoutChange = ({ layout }: { layout: LayoutType }) => {
+    setFormLayout(layout);
   };
-
+  const handleFinish = async (value: any) => {
+    console.log(value.userName);
+    console.log(value.password);
+    let dataLogin = await GetLogin(value.userName, value.password);
+    console.log(dataLogin);
+    if (dataLogin.message) {
+      message.info("Sai tên đăng nhập hoặc mật khẩu");
+    } else {
+      localStorage.setItem("userFullName", dataLogin.userFullName);
+      localStorage.setItem("userName", dataLogin.userCode);
+      localStorage.setItem("token", dataLogin.token);
+      localStorage.setItem("refreshToken", dataLogin.tokenRefresh);
+      localStorage.setItem("avatar", dataLogin.avatar);
+      localStorage.setItem("userRole", dataLogin.userRole);
+      if (connection)
+        if (connection.state == HubConnectionState.Connected)
+          connection.invoke("UserConnected", value.userName);
+      props.handleSuccess(true);
+    }
+  };
   return (
-    <div className="Container">
-      <div className="left">
-        <div className="form-container">
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={handleLogin}
-            style={{ width: "100%" }}
-          >
-            <img src={logo} alt="logo" className="logo" />
-            <Form.Item
-              label="Tên đăng nhập *"
-              name="username"
-              rules={[
-                { required: true, message: "Vui lòng nhập tên đăng nhập!" },
-              ]}
-            >
-              <Input placeholder="Tên đăng nhập" className="input-field" />
-            </Form.Item>
-            <Form.Item
-              label="Mật khẩu *"
-              name="password"
-              rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
-            >
-              <Input.Password placeholder="Mật khẩu" className="input-field" />
-            </Form.Item>
-
-            <Form.Item>
-              <a className="forgot-password">Quên mật khẩu?</a>
-            </Form.Item>
-            <Form.Item className="button-container">
-              <Button type="primary" htmlType="submit" className="login-button">
-                Đăng nhập
-              </Button>
-            </Form.Item>
-          </Form>
+    <div className={styles.container}>
+      <div className={styles.left}>
+        <div className={styles.imageContainer}>
+          <img src="./images/Logo.png" className={styles.imageLogo} />
         </div>
+        <Form
+          className={styles.login}
+          layout={formLayout}
+          form={form}
+          onFinish={handleFinish}
+          initialValues={{ layout: formLayout }}
+          onValuesChange={onFormLayoutChange}
+        >
+          <Form.Item name="layout"></Form.Item>
+          <Form.Item name="userName" label="Tên đăng nhập (*)">
+            <Input placeholder="input placeholder" />
+          </Form.Item>
+          <Form.Item name="password" label="Mật khẩu (*)">
+            <Input placeholder="input placeholder" type="password" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Đăng nhập
+            </Button>
+          </Form.Item>
+        </Form>
       </div>
-      <div className="right">
-        <img
-          src="../../images/LoginRight.png"
-          alt="Hệ thống quản lý xếp hàng"
-          className="illustration"
-        />
-        <div className="system-text-container">
-          <p className="system-text-title">Hệ thống</p>
-          <p className="system-text-subtitle">QUẢN LÝ XẾP HÀNG</p>
+      <div className={styles.right}>
+        <img src="./images/LoginRight.png" />
+        <div className={styles.text}>
+          <p className={styles.normal}>Hệ thống</p>
+          <p className={styles.highlight}>Quản lý xếp hàng</p>
         </div>
       </div>
     </div>
   );
 };
-
 export default Login;

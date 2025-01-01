@@ -1,263 +1,89 @@
-import React, { useState, useEffect } from "react";
-import "./style.css";
-import Calendar from "../../components/calendar";
-import { error } from "console";
-
+import React, {useState, useEffect} from "react";
+import { Tag } from "antd";
+import './styles.css'
+import Device from "../../components/device";
+import Sidebar from "../../components/sidebar";
+import MainContent from "../../components/mainContent";
+import RightSidebar from "../../components/rightSidebar";
+import DeviceForm from "../../components/DeviceForm";
+import DeviceDetails from "../../components/DeviceDetails";
+import DeviceUpdateForm from "../../components/DeviceUpdateForm";
+import { getServiceData } from "./Dashboard.logic";
+import AccountForm from "../../components/AccountForm";
 const Dashboard = () => {
-  // Thiết bị
-  const totalDevices = 4221;
-  const activeDevices = 3779;
-  const inactiveDevices = totalDevices - activeDevices;
-  const [deviceDegree, setDeviceDegree] = useState(
-    (activeDevices / totalDevices) * 360
-  );
-
-  // Dịch vụ
-  const totalServices = 276;
-  const activeServices = 210;
-  const inactiveServices = totalServices - activeServices;
-  const [serviceDegree, setServiceDegree] = useState(
-    (activeServices / totalServices) * 360
-  );
-
-  // Cấp số
-  const totalNumbers = 4221;
-  const activeNumbers = 3621;
-  const waitingNumbers = 468;
-  const skippedNumbers = totalNumbers - activeNumbers - waitingNumbers;
-  const [numberDegree, setNumberDegree] = useState(
-    (activeNumbers / totalNumbers) * 360
-  );
-  const [numberDegree2, setNumberDegree2] = useState(
-    (waitingNumbers / totalNumbers) * 360
-  );
-
-  useEffect(() => {
-    setDeviceDegree((data1?.active / data1?.total) * 360);
-    setServiceDegree((activeServices / totalServices) * 360);
-    setNumberDegree((activeNumbers / totalNumbers) * 360);
-    setNumberDegree2((waitingNumbers / totalNumbers) * 360);
-  }, []);
-
-  const data = [
-    { date: "07", value: 3589 },
-    { date: "13", value: 3000 },
-    { date: "19", value: 4221 },
-    { date: "25", value: 3200 },
-    { date: "31", value: 2800 },
-  ];
-
-  interface DeviceInfo {
-    total: number;
-    active: number;
-    inactive: number;
-  }
-  interface ServiceInfo {
-    total: number;
-    active: number;
-    inactive: number;
-  }
-
-  interface DeviceData {
-    date: string;
-    value: number;
-  }
-
-  const [data1, setData1] = useState<DeviceInfo>({
-    total: 0,
-    active: 0,
-    inactive: 0,
-  });
-
-  // const [data2, setData2] = useState<ServiceInfo>({
-  //   total: number;
-  // });
-  // const [data, setData] = useState<DeviceData[]>([]);
-
-  // const [data1, setData1] = useState<any[]>([]);
-  const [data2, setData2] = useState<any>([]);
-
-  const getDeviceInfo = () => {
-    fetch("https://192.168.80.188:7251/api/Device/devicesinfor")
-      .then((Response) => Response.json())
-      .then((data: any) => {
-        console.log(data);
-        setData1(data);
-      })
-      .catch((error) => console.log("Error fetching data:", error));
-  };
-
-  const getServiceInfo = () => {
-    fetch("https://192.168.80.188:7251/api/Service/serviceinfor")
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        setData2(data);
-      })
-      .catch((error) => console.log("Error fetching data:", error));
-  };
-
-  useEffect(() => {
-    getDeviceInfo();
-    getServiceInfo();
-  }, []);
-
-  return (
-    <div className="Container">
-      <div className="left">
-        <div className="ImageContainer">
-          <img src="../../images/Logo.png" alt="" className="ImageLogo" />
+    const [dataUserEdit, setDataUserEdit] = useState<any>({});
+    const [selectedIndex, setSelectedIndex] = useState(0);
+    const [serviceOptions, setServiceOptions] = useState<{value:string, label: string}[]>([])
+    const handleReceiveSelectedIndex = (index:number)=>{
+        setSelectedIndex(index);
+    }   
+    const handleReceiveIndexFromDevice = (index:number, data:any)=>{
+      setDataUserEdit(data);
+      setSelectedIndex(index);
+    }
+    const handleReceiveState = (status: boolean) => {
+      if(!status){
+        setSelectedIndex(5);
+      }
+    } 
+    const handleUpdate = (updatedData: any) => {
+        console.log('Cập nhật dữ liệu:', updatedData);
+      }; 
+      const handleCancel = () => {
+        console.log('Hủy cập nhật');
+      };
+    useEffect(()=>{
+        async function getDataSvc(){
+          let srvData = await getServiceData();
+          setServiceOptions(srvData);
+        }
+        getDataSvc();
+    },[])
+    return(
+        <div className="container">
+            <Sidebar sendSelectedIndex={handleReceiveSelectedIndex} />
+            {selectedIndex==0?
+            <div className="rightContainer">
+            <MainContent />
+            <RightSidebar />
+            </div>
+            :selectedIndex==1?
+                <Device key={`device-index-1`}
+                buttonText="Thêm thiết bị"
+                headerText="Thiến bị > Danh sách thiết bị"
+                sendSelectedIndex={handleReceiveIndexFromDevice} 
+                columns={1} filter1="Trạng thái hoạt động" filter2="Trạng thái kết nối"
+                />
+            :selectedIndex==2?
+            null
+            :selectedIndex==3?
+            null
+            :selectedIndex==4?
+            null
+          :selectedIndex==5?
+          <Device headerText="Dịch vụ > Danh sách dịch vụ" buttonText="Thêm dịch vụ"
+          key={`device-index-5`}
+          sendSelectedIndex={handleReceiveIndexFromDevice} 
+          columns={2} filter1="Trạng thái hoạt động" filter2="Chọn thời gian"
+          />
+          : selectedIndex==6? <Device headerText="Cấp số > Danh sách các số đã cấp"
+          buttonText="Cấp số mới"
+          key={`device-index-6`}
+          sendSelectedIndex={handleReceiveIndexFromDevice}
+          columns={3}  filter1="Tên dịch vụ" filter2="Tình trạng"
+          />
+          : selectedIndex==7?
+          <Device headerText="Tài khoản người dùng > Danh sách tài khoản"
+          buttonText="Thêm người dùng"
+          key={`device-index-7`}
+          sendSelectedIndex={handleReceiveIndexFromDevice}
+          columns={4}  filter1="Tên vai trò" filter2="Trạng thái"
+          />
+          : <AccountForm myForm={dataUserEdit} serviceOptions={serviceOptions}
+          handleSendStatus={handleReceiveState}
+          />
+          }
         </div>
-        <div className="Content-left">
-          <div>
-            <p>Dashboard</p>
-          </div>
-          <div>
-            <p>Thiết bị</p>
-          </div>
-          <div>
-            <p>Dịch vụ</p>
-          </div>
-          <div>
-            <p>Cấp số</p>
-          </div>
-          <div>
-            <p>Báo cáo</p>
-          </div>
-          <div>
-            <p>Cài đặt hệ thống</p>
-          </div>
-        </div>
-        <div className="end-left">
-          <p
-            className="Logout"
-            onClick={() => {
-              localStorage.clear();
-              window.location.reload();
-            }}
-          >
-            Đăng xuất
-          </p>
-        </div>
-      </div>
-      <div className="middle"></div>
-      <div className="right">
-        <div className="user_info"></div>
-        <div className="general">
-          {/* Vòng tròn Thiết bị */}
-          <div className="circle-container">
-            <div
-              className="circle"
-              style={{
-                background: `conic-gradient(red 0deg ${deviceDegree}deg, transparent ${deviceDegree}deg 360deg)`,
-              }}
-            >
-              <div className="second-circle">
-                <div
-                  className="third-circle"
-                  style={{
-                    background: `conic-gradient(green 0deg ${
-                      360 - deviceDegree
-                    }deg, transparent ${360 - deviceDegree}deg 360deg)`,
-                  }}
-                >
-                  <div className="inner-circle">
-                    {Math.round((data1?.active * 100) / data1?.total)}%
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="statistics">
-              <h1 className="quanlity">{data1?.total}</h1>
-              <ul>
-                <li>Đang hoạt động: {data1?.active}</li>
-                <li>Ngừng hoạt động: {data1?.total - data1?.active}</li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Vòng tròn Dịch vụ */}
-          <div className="circle-container">
-            <div
-              className="circle"
-              style={{
-                background: `conic-gradient(blue 0deg ${serviceDegree}deg, transparent ${serviceDegree}deg 360deg)`,
-              }}
-            >
-              <div className="second-circle">
-                <div
-                  className="third-circle"
-                  style={{
-                    background: `conic-gradient(green 0deg ${
-                      360 - serviceDegree
-                    }deg, transparent ${360 - serviceDegree}deg 360deg)`,
-                  }}
-                >
-                  <div className="inner-circle">
-                    {Math.round((activeServices * 100) / totalServices)}%
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="statistics">
-              <h1 className="quanlity">{totalServices}</h1>
-              <ul>
-                <li>Đang hoạt động: {activeServices}</li>
-                <li>Ngừng hoạt động: {inactiveServices}</li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Vòng tròn Cấp số */}
-          <div className="circle-container">
-            <div
-              className="circle"
-              style={{
-                background: `conic-gradient(green 0deg ${numberDegree}deg, transparent ${numberDegree}deg 360deg)`,
-              }}
-            >
-              <div className="second-circle">
-                <div
-                  className="third-circle"
-                  style={{
-                    background: `conic-gradient(gray 0deg ${numberDegree2}deg, transparent ${numberDegree2}deg 360deg)`,
-                  }}
-                >
-                  <div className="fourth-circle">
-                    <div
-                      className="fifth-circle"
-                      style={{
-                        background: `conic-gradient(red 0deg ${
-                          360 - numberDegree - numberDegree2
-                        }deg, transparent ${
-                          360 - numberDegree - numberDegree2
-                        }deg 360deg)`,
-                      }}
-                    >
-                      <div className="inner-circle">
-                        {Math.round((activeNumbers * 100) / totalNumbers)}%
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="statistics">
-              <h1 className="quanlity">{totalNumbers}</h1>
-              <ul>
-                <li>Đã sử dụng: {activeNumbers}</li>
-                <li>Đang chờ: {waitingNumbers}</li>
-                <li>Bỏ qua: {skippedNumbers}</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div className="calendar">
-          <Calendar />
-        </div>
-      </div>
-    </div>
-  );
-};
-
+    )
+}
 export default Dashboard;

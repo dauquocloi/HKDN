@@ -1,23 +1,23 @@
 import React, { useState } from "react";
-import Dashboard from "./pages/dashboard/Dashboard";
+import logo from "./logo.svg";
+import "./App.css";
 import Login from "./pages/login/Login";
-import ForgotPass from "./pages/login/ForgotPass";
-import ResetPass from "./pages/login/ResetPass";
-
+import Dashboard from "./pages/dashboard/Dashboard";
 function App() {
-  // const [isLogined, setIsLogined] = useState(false);
-  // const receiveLogin = (isLogined: boolean) => {
-  //   setIsLogined(isLogined);
-  // };
-
+  const [isLogined, setIsLogined] = useState(false);
+  const receiveLogin = (isLogined: boolean) => {
+    setIsLogined(isLogined);
+  };
   return (
-    // <div>
-    //   {!isLogined ? <Login handleSuccess={receiveLogin} /> : <Dashboard />}
-    // </div>
-    <ResetPass />
-    // <Dashboard />
-    // <ForgotPass />
+    <div>
+      {localStorage.getItem("token") ? (
+        <Dashboard />
+      ) : !isLogined ? (
+        <Login handleSuccess={receiveLogin} />
+      ) : (
+        <Dashboard />
+      )}
+    </div>
   );
 }
-
 export default App;
